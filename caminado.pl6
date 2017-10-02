@@ -23,7 +23,26 @@ sub export-data-for-graphics (@data) {
 }
 
 sub plot { 
-    # to do
+    my $cfg = q:to/END/; 
+        set terminal png size 640,480;
+        set output 'distancia.png';
+        
+        set ylabel 'Distancia (km)';
+        set xlabel 'Semanas';
+        
+        set grid;
+        set xtic rotate by -45;
+        
+        set xdata time;
+        set timefmt '%Y-%m-%d';
+        
+        set boxwidth 3600*24 * 0.6;
+        set style fill solid 0.6 noborder;
+        
+        plot 'distancia.dat' using 1:2 with boxes title 'caminado' linecolor rgb 'skyblue';
+        END 
+
+    shell «gnuplot -e \"$cfg\"»; 
 }
 
 sub show-report ($file, Bool $export?) {
@@ -86,7 +105,7 @@ sub from-stdin ($save-as) {
     spurt $save-as, $data, :append;
 }
 
-sub MAIN ($file?, Bool :$export?, :$save-as = "distancia-caminada.txt") {
+multi sub MAIN ($file?, Bool :$export?, :$save-as = "distancia-caminada.txt") {
     with $file {
         $export
             ?? show-report($file, $export)
@@ -98,3 +117,6 @@ sub MAIN ($file?, Bool :$export?, :$save-as = "distancia-caminada.txt") {
     }
 }
 
+multi sub MAIN (Bool :$plot) {
+    plot;
+}

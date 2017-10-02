@@ -2,7 +2,9 @@ Caminado
 --------
 
 La idea es simplemente facilitar el ingreso de datos y mostrar un reporte
-informativo.
+informativo. Se vería algo así.
+
+![render gnuplot](/imgs/distancia.png)
 
 ## Uso
 
@@ -12,6 +14,7 @@ informativo.
 $ caminado.pl6 --help
 Usage:
   caminado.pl6 [--export] [--save-as=<Any>] [<file>]
+  caminado.pl6 [--plot]
 
 # sin argumentos se pueden ingresar datos, simplemente con enter se acepta
 # la fecha por defecto (la del día de hoy) al igual que si no se ingresan
@@ -62,6 +65,10 @@ Mayor distancia: 5.03 km
 
 Datos exportados
 
+# con plot simplemente usa los datos exportados y los dibuja gracias a
+# gnuplot. Genera un archivo 'distancia.png'
+
+$ caminado.pl6 --plot
 ```
 
 ## Hoja de ruta
@@ -69,8 +76,11 @@ Datos exportados
 * ~Capturar datos de entrada~
 
 * Crear un informe que incluya: total, promedio, mayor distancia
-  [parcialmente implementado]
+  **[parcialmente implementado]**
 
-* ~Opcionalmente exportar como csv~ [exporta como tsv para graficar]
+* ~Opcionalmente exportar como csv~ **[exporta como tsv para graficar]**
 
-* Graficar los datos exportados
+* ~Graficar los datos exportados~ **[mediante la opción plot]**
+
+## Requisitos
+* [gnuplot](http://gnuplot.info/)
