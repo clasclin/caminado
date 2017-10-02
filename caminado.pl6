@@ -1,39 +1,68 @@
-#!/usr/bin/env perl6
+#!/usr/bin/env perl6 
+#
+# caminado.pl6 - Facilita el ingreso de datos y muestra un reporte
+#
 
 use v6;
 
-sub show-report ($file) {
+class Walk {
+    has $.date;
+    has $.distance;
+    
+    method week {
+        return Date.new($!date).week-number;
+    }
+}
+
+sub export-data-for-graphics (@data) {
+    for @data -> $obj {
+        my $day-and-distance = $obj.date ~ "\t" ~ $obj.distance ~ "\n";
+        spurt 'distancia.dat', $day-and-distance, :append;
+    }
+    say "Datos exportados";
+}
+
+sub plot { 
+    # to do
+}
+
+sub show-report ($file, Bool $export?) {
     # create a report with statistics
 
     my @walks;
-    for "$file".IO.lines -> $line {
+    for $file.IO.lines -> $line {
         next unless $line ~~ /^ \d+  /;
 
-        my ($date, $distance) = $line.split(' | ');
-        my @roads = $distance.words;
-        my $day-walk;
+        my ($date, $distances) = $line.split(' | ');
+        my $distance           = $distances.words.sum;
 
-        for @roads -> $road {
-            $day-walk += $road;
-        }
-
-        $date = Date.new($date);
-        my $week-number = $date.week-number;
-        @walks.push: { 
-            date => $date, 
-            week => $week-number, 
-            distance => $day-walk,
-        }
+        @walks.push: Walk.new(:$date, :$distance);
     }
-    my $long-distance  = [max] @walks»{'distance'};
-    my $total-distance = [+] @walks»{'distance'};
 
-    say "";
-    say "REPORTE";
-    say '-' x 40;
-    say "Mayor distancia: $long-distance";
-    say "Distancia total: $total-distance";
-    say "";
+    my $long-distance    = @walks.sort({ .distance }).tail;
+    my $total-distance   = [+] @walks».distance;
+    my $first            = Date.new(@walks».date.sort.head);
+    my $last             = Date.new(@walks».date.sort.tail);
+    my $period-time      = $last - $first;
+    my $average-distance = $total-distance / @walks.elems;
+
+    my $report = q:to/EOF/; 
+
+        REPORTE
+        ----------------------------------------
+        Distancia total: %s km
+                periodo: %s días
+        Mayor distancia: %s km
+                  fecha: %s
+                 semana: %s
+               Promedio: %.2f km 
+
+        EOF
+
+    printf $report, $total-distance, $period-time, $long-distance.distance,
+           $long-distance.date, $long-distance.week, $average-distance;
+
+    export-data-for-graphics(@walks) if $export;
 }
 
 sub from-stdin ($save-as) {
@@ -51,13 +80,17 @@ sub from-stdin ($save-as) {
             !! last;
     }
 
+    my $head = "Fecha        Distancia\n----------------------\n";
     my $data = $date ~ ' | ' ~ join ' ', @total-distance ~ "\n";
+    spurt $save-as, $head unless $save-as.IO.e;
     spurt $save-as, $data, :append;
 }
 
-sub MAIN ($file?, :$save-as = 'distancia-caminada.txt') {
+sub MAIN ($file?, Bool :$export?, :$save-as = "distancia-caminada.txt") {
     with $file {
-        show-report($file);
+        $export
+            ?? show-report($file, $export)
+            !! show-report($file);
     }
     else {
         from-stdin($save-as);
