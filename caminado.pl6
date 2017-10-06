@@ -5,6 +5,8 @@
 
 use v6;
 
+chdir "$*HOME/Escritorio";
+
 class Walk {
     has $.date;
     has $.distance;
@@ -22,31 +24,32 @@ sub export-data-for-graphics (@data) {
     say "Datos exportados";
 }
 
-sub plot { 
-    my $cfg = q:to/END/; 
-        set terminal png size 640,480;
-        set output 'distancia.png';
+sub plot ($dat-file, $save-as) { 
+    my $cfg = qq:to/END/; 
+        set terminal png size 800,480;
+        set output "$save-as";
         
-        set ylabel 'Distancia (km)';
-        set xlabel 'Semanas';
+        set ylabel 'Distancia km';
+        set xlabel "Semanas";
         
         set grid;
         set xtic rotate by -45;
         
         set xdata time;
-        set timefmt '%Y-%m-%d';
+        set timefmt "%Y-%m-%d";
+        set format x "%d-%m-%Y";
         
         set boxwidth 3600*24 * 0.6;
         set style fill solid 0.6 noborder;
         
-        plot 'distancia.dat' using 1:2 with boxes title 'caminado' linecolor rgb 'skyblue';
+        plot "$dat-file" using 1:2 with boxes title "caminado" linecolor rgb "skyblue"
         END 
 
-    shell «gnuplot -e \"$cfg\"»; 
+    run 'gnuplot', '-e', $cfg; 
 }
 
 sub show-report ($file, Bool $export?) {
-    # create a report with statistics
+    # show a report with statistics
 
     my @walks;
     for $file.IO.lines -> $line {
@@ -105,18 +108,19 @@ sub from-stdin ($save-as) {
     spurt $save-as, $data, :append;
 }
 
-multi sub MAIN ($file?, Bool :$export?, :$save-as = "distancia-caminada.txt") {
-    with $file {
-        $export
-            ?? show-report($file, $export)
-            !! show-report($file);
-    }
-    else {
-        from-stdin($save-as);
-        show-report($save-as);
-    }
+multi sub MAIN (:$save-as = "distancia-caminada.txt") {
+    from-stdin($save-as);
 }
 
-multi sub MAIN (Bool :$plot) {
-    plot;
+multi sub MAIN (Bool :$reporte, :$file = "distancia-caminada.txt") {
+    show-report($file, True);
 }
+
+multi sub MAIN (
+    Bool :$plot,
+    :$file = "distancia.dat", 
+    :$save-as = "distancia.png",
+) {
+    plot($file, $save-as);
+}
+
