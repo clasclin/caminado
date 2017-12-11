@@ -1,11 +1,11 @@
 #!/usr/bin/env perl6 
 #
-# caminado.pl6 - Facilita el ingreso de datos y muestra un reporte
+# caminata.pl6 - Facilita el ingreso de datos y muestra un reporte
 #
 
 use v6;
 use lib 'lib';
-use Caminar;
+use Caminata;
 
 multi sub MAIN (Str :$save-as = "distancia-caminada.txt") {
     from-stdin($save-as);

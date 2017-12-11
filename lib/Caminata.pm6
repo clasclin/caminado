@@ -1,4 +1,4 @@
-unit module Caminar;
+unit module Caminata;
 
 class Walk {
     has $.date;
@@ -31,7 +31,7 @@ sub plot (Str $dat-file, Str $save-as, Str $size) is export {
         
         set xdata time;
         set timefmt "%Y-%m-%d";
-        set format x "%d-%m-%Y";
+        set format x "%d-%m";
         
         set boxwidth 3600*24 * 0.6;
         set style fill solid 0.6 noborder;
