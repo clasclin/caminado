@@ -88,7 +88,8 @@ class Walks is export {
             set boxwidth 3600*24 * 0.7;
             set style fill solid 0.8 noborder;
 
-            plot "$dat-file" using 1:2 with boxes title "caminado" linecolor rgb "$color"
+            plot "$dat-file" using 1:2 with boxes title "caminado" 
+            linecolor rgb "$color"
             END
 
         run 'gnuplot', '-e', $cfg;
